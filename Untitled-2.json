@@ -1,0 +1,82 @@
+{
+  "key": {
+    "id": 0001
+},
+  "value": {
+    "before": {
+		"id": "0001",
+		"type": "donut",
+		"name": "Cake",
+		"ppu": 0.55,
+		"batters":
+			{
+				"batter":
+					[
+						{ "id": "1001", "type": "Regular" },
+						{ "id": "1002", "type": "Chocolate" },
+						{ "id": "1003", "type": "Blueberry" },
+						{ "id": "1004", "type": "Devil's Food" }
+					]
+			},
+		"topping":
+			[
+				{ "id": "5001", "type": "None" },
+				{ "id": "5002", "type": "Glazed" },
+				{ "id": "5005", "type": "Sugar" },
+				{ "id": "5007", "type": "Powdered Sugar" },
+				{ "id": "5006", "type": "Chocolate with Sprinkles" },
+				{ "id": "5003", "type": "Chocolate" },
+				{ "id": "5004", "type": "Maple" }
+			]
+	},
+    "after": {
+		"id": "0001",
+		"type": "donut",
+		"name": "popcorn",
+		"ppu": 0.55,
+		"batters":
+			{
+				"batter":
+					[
+						{ "id": "1001", "type": "Regular" },
+						{ "id": "1002", "type": "Chocolate" },
+						{ "id": "1003", "type": "Blueberry" },
+						{ "id": "1004", "type": "Devil's Food" }
+					]
+			},
+		"topping":
+			[
+				{ "id": "5001", "type": "None" },
+				{ "id": "5002", "type": "Glazed" },
+				{ "id": "5005", "type": "Sugar" },
+				{ "id": "5007", "type": "Powdered Sugar" },
+				{ "id": "5006", "type": "Chocolate with Sprinkles" },
+				{ "id": "5003", "type": "Chocolate" },
+				{ "id": "5004", "type": "Maple" }
+			]
+	},
+    "source": { 
+      "version": "3.0.0.Final",
+      "name": "mysql-server-1",
+      "connector": "mysql",
+      "ts_ms": 1465581029100,
+      "ts_us": 1465581029100000,
+      "ts_ns": 1465581029100000000,
+      "snapshot": false,
+      "db": "inventory",
+      "table": "customers",
+      "server_id": 223344,
+      "gtid": null,
+      "file": "mysql-bin.000003",
+      "pos": 484,
+      "row": 0,
+      "thread": 7,
+      "query": "UPDATE customers SET name='popcorn' WHERE id=0001"
+    },
+    "op": "u", 
+    "ts_ms": 1465581029523, 
+    "ts_us": 1465581029523758, 
+    "ts_ns": 1465581029523758914 
+  }
+}
+
