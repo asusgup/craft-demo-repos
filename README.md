@@ -4,6 +4,8 @@
 
 
 
+# Key points on CDC event processing.
+
 * Producer SDK fetches the changes events from the source system via GET request (GET https://<domain>/cdc?entity=<table_name>&updatedSince=<last_fetched_timestamp>) and stores the last event timestamp in RDS.
 
 * Initially, the fetched event schemas are registered in schema registry.
