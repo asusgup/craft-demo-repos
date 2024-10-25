@@ -25,3 +25,12 @@
 * The Spark Stream Job can read data from S3 raw bucket in real-time, transform and write into Target table in delta lake format.
 * If the ambiguous messages  in DynamoDB are non-retriable, then those events can be considered as stale events and appropriate notification/alerts can be triggered to the concerned teams. These messages can then be deleted from DynamoDB.
 
+# Managed services used in the design
+
+* AWS Managed Kafka - Serves as a distributed, scalable and fault-tolerant messaging system. It could help scale to billions of events messages.
+
+* Schema Registry - Serves as a centralized schema management and storage, which makes it easier to track schema changes of source table.
+
+* AWS Lambda - Serves as a event based serverless function utility which checks for bad/stale records in DynamoDB and retries the message publishing back to kafka. Also responsible for triggering critical alert msgs to concerned teams.
+
+* AWS DynamoDB - DynamoDB supports eventual consistency and high availability so that during kafka service unavailability, The events could be efficiently stored in DynamoDB. 
