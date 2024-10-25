@@ -1,8 +1,10 @@
 from confluent_kafka.avro import AvroConsumer
 from confluent_kafka import KafkaError
 from pyspark.sql import SparkSession
+from jproperties import Properties
 from pyspark.sql.functions import col
 from delta.tables import *
+from datetime import datetime
 
 kafka_configs = Properties()
 with open('kafka-configs.properties', 'rb') as config_file:
@@ -10,7 +12,7 @@ with open('kafka-configs.properties', 'rb') as config_file:
 
 spark = SparkSession.builder.appName("craft_demo").master("local[1]").getOrCreate()
 
-def flatten_json_and_Merge(after_json, primary_keys):
+def flatten_json_and_Write_To_S3(after_json, primary_keys):
 
     # Reading and flatteing the data
     # Took example of following sample json event => https://opensource.adobe.com/Spry/samples/data_region/JSONDataSetSample.html#Exam
@@ -22,38 +24,22 @@ def flatten_json_and_Merge(after_json, primary_keys):
       .withColumn("topping_types",col("topping.type"))\
       .drop("batters","topping")
 
-    cdc_events_source = flatten_df
-    targetTable = DeltaTable.forName(spark, "tgt_tbl")
+    s3_bucket = kafka_configs.get('S3_RAW_BUCKET_PATH').data
+    today_date = datetime.today().strftime("%Y-%m-%d")
 
-    # Computing the merge condition to be applied on delta lake
-    merge_condition = ""
-    for idx in range(len(primary_keys)):
-        key = primary_keys[idx]
-        merge_condition+= f"old_data.{0} = new_events.{0} ".format(keys)
-        if idx <len(primary_keys)-1:
-            merge_condition+= "and "
-    
-    merge_condition = merge_condition.strip()
+    # Writing the flattened data as csv format in today's date partition filter
+    flatten_df.write.format("csv").option("header","true").save(f"s3_bucket/{date}".format(date = today_date))
 
-    # Applying the merge statement at Target Delta table to perform UPSERTS and remove DELETED data from source
-    targetTable.alias("old_data")\
-    .merge(
-        cdc_events_source.alias("new_events"), merge_condition
-    )\
-    .whenMatchedUpdateAll()\
-    .whenNotMatchedInsertAll()\
-    .whenNotMatchedBySourceDelete()\
-    .execute()
 
-def ETL_Processing(data, primary_keys):
+def consumer_Processing(data, primary_keys):
     # Here We are flattening the json data and merging with the target table in data lake
 
     data_without_delete_events = []
     for events in data:
         if events['op'] != 'D':   # Filtering out the deleted events on source side, Only include 'I' and 'U' (Insert and Update)
-            data_without_delete_events.append(events)
+            data_without_delete_events.append(events['after'])
 
-    flatten_json_and_Merge(data_without_delete_events['after'], primary_keys)
+    flatten_json_and_Write_To_S3(data_without_delete_events, primary_keys)
 
 # Defining Consumer Configs
 consumer_config = {
@@ -101,7 +87,7 @@ try:
                 print(f"Consumed record with key: {key} and value: {value}")
         
         # Starting ETL processing of data
-        ETL_Processing(data,primary_keys)
+        consumer_Processing(data,primary_keys)
         else:
             print("No records found.")
 
