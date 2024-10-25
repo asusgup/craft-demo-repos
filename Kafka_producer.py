@@ -25,7 +25,6 @@ kafka_url = kafka_configs.get("BOOTSTRAP_SERVER").data
 schema_registry_url = kafka_configs.get("SCHEMA_REGISTRY_URL").data
 kafka_topic = kafka_configs.get("KAFKA_TOPIC").data
 schema_registry_subject = f"{kafka_topic}-value"
-DLQ_topic = kafka_configs.get("DEAD_LETTER_QUEUE_TOPIC").data
 Security_protocol = kafka_configs.get("SECURITY_PROTOCOL").data
 delivery_timeout = kafka_configs.get("DELIVERY_TIMEOUT_MS").data
 idempotence = kafka_configs.get("ENABLE_IDEMPOTENCE").data
@@ -101,9 +100,8 @@ def avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_su
                     publish_to_Kafka(kafka_topic, decoded_json, producer)
                     
                 else:
-                    # PUBLISING THE BAD DATA TO DEAD LETTER QUEUE TOPIC
-                    producer.produce(topic=DLQ_topic, key=decoded_json["key"], value=decoded_json["value"], on_delivery=delivery_report)
-                    publish_to_Kafka(DLQ_topic, decoded_json, producer)
+                    # PUBLISING THE BAD DATA TO DynamoDB
+                    insertInto_DynamoDB(decoded_json) 
 
     connection, cursor = build_Mysql_Connection()
     cursor.execute(f"UPDATE {db}.cmpny_data SET last_upd = CURRENT_MAX_UPD_DT WHERE feed_name = 'cmpny_data'")                    
