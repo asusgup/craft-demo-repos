@@ -1,8 +1,7 @@
 # craft-demo-repos
-![intuit_craft_demo6](https://github.com/user-attachments/assets/8c55610b-e067-4c0f-8b33-fa58387d7bc8)
 
 
-
+![intuit_craft_demo6](https://github.com/user-attachments/assets/555a0029-70db-42f1-add0-9b34bbe6dbee)
 
 
 # Key points on CDC event processing.
