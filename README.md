@@ -1,24 +1,18 @@
 # craft-demo-repos
 
 
-![intuit_craft_demo6](https://github.com/user-attachments/assets/555a0029-70db-42f1-add0-9b34bbe6dbee)
 
+![intuit_craft_demo7](https://github.com/user-attachments/assets/949ef7e3-c9b3-424c-a238-f61e6a0e7fa5)
 
 # Key points on CDC event processing.
 
-* Producer SDK fetches the changes events from the source system via GET request (GET https://<domain>/cdc?entity=<table_name>&updatedSince=<last_fetched_timestamp>) and stores the last event timestamp in RDS.
-
-* Initially, the fetched event schemas are registered in schema registry.
-
-* The kafka source application publishes the events into Kafka topic using producer SDK.
-
-* When an application starts up, an event schema is cached in the producing application for high performance.
-
-* The SDK performs schema validation to ensure the event is as per the schema.
-
-* If the Validation passed, producer send the event to kafka topic(with Avro serialization). In case of validation error, Events are routed to DynamoDB as ambiguous messages for further analysis.
-
-* If Kafka server is unavailable, then the messages are written to DynamoDB (To have resilient and fault tolerant system).
+* The target table is assumed to be in delta format, This is considered to use delta lake’s ACID semantics for efficient UPSERTS.
+* The API GET Response is assumed not to contain any table schema/DDL changes. Only events like I, U, D  (Insert, update , delete) records are included for simplicity and events contain all details of the columns required on target side.
+* The API is exposed internally within the system. It is not exposed publicly So we are assuming here that the APIs need no data sanity check and will be used mostly as-expected. Also this eliminates the need of authentication and authorization. 
+* The API endpoint is highly available. So there is no lag in polling the events at a specific frequency.
+* The API response is assumed to be of valid json schema. 
+* In case of Kafka Service being unavailable, The dynamoDB events are given priority than the producer SDK events to be pushed to  kafka to maintain message ordering.
+* The source and target tables are normalized, assumed to have a primary key, So that we can merge those events to Target table on the basis of that primary key.
 * A Retry producer Lambda Function is configured to retry sending the messages from DynamoDB., if retriable to Kafka topics once it is available. 
 * Ambiguous messages in DynamoDB are further analyzed by a Retry Lambda Function utility. if they can be retried sending to kafka.
 * A Retry producer Lambda Function is configured to retry sending the messages from DynamoDB., if retriable to Kafka topics once it is available.
@@ -26,6 +20,7 @@
 * The Spark Batch Job can read the data from S3 raw bucket, transform the data and write into target table in delta lake format.
 * The Spark Stream Job can read data from S3 raw bucket in real-time, transform and write into Target table in delta lake format.
 * If the ambiguous messages  in DynamoDB are non-retriable, then those events can be considered as stale events and appropriate notification/alerts can be triggered to the concerned teams. These messages can then be deleted from DynamoDB.
+
 
 # Managed services used in the design
 
