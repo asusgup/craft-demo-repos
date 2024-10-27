@@ -11,7 +11,8 @@ with open('kafka-configs.properties', 'rb') as config_file:
 
 # Creating Spark Session
 logging.info("Creating Spark Session")
-spark = SparkSession.builder.appName("craft_demo").master("local[1]").getOrCreate()
+spark = SparkSession.builder.appName("craft_demo").config("spark.sql.extensions", "org.apache.spark.sql.delta.sql.DeltaSparkSessionExtensions") \
+    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog").master("yarn").getOrCreate()
 
 s3_bucket = kafka_configs.get('S3_RAW_BUCKET_PATH').data
 primary_keys = kafka_configs.get('PRIMARY_KEYS').data
