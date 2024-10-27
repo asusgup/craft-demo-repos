@@ -20,19 +20,13 @@
   
 * If Kafka server is unavailable, then the messages are written to DynamoDB (To have resilient and fault tolerant architecture). 
 
-* A Retry producer Lambda Function is configured to retry sending the messages from DynamoDB., if retriable to Kafka topics once it is available.
-  
-* Ambiguous messages in DynamoDB are further analyzed by a Retry Lambda Function utility. if they can be retried sending to kafka.
-  
-* A Retry producer Lambda Function is configured to retry sending the messages from DynamoDB., if retriable to Kafka topics once it is available.
-  
-* Consumer Applications consume messages from kafka topics, and stores the raw, flattened json data in Raw S3 Bucket.
-  
-* The Spark Batch Job can read the data from S3 raw bucket, transform the data and write into target table in delta lake format.
-  
-* The Spark Stream Job can read data from S3 raw bucket in real-time, transform and write into Target table in delta lake format.
-  
 * If the ambiguous messages  in DynamoDB are non-retriable, then those events can be considered as stale events and appropriate notification/alerts can be triggered to the concerned teams. These messages can then be deleted from DynamoDB.
+* A Retry producer Lambda Function is configured to retry sending the messages from DynamoDB., if retriable to Kafka topics once it is available.
+* Kafka availability can be tracked using AWS cloudwatch, Once available all retrievable messages are sent to kafka.
+* Consumer Applications consume messages from kafka topics, and stores the raw, flattened json data in Raw S3 Bucket.
+* The Spark Batch Job can read the data from S3 raw bucket, transform the data and write into target table in delta lake format.
+* The Spark Streaming Job can read data from S3 raw bucket in real-time, transform and write into Target table in delta lake format.
+
 
 
 # Managed services used in the design
