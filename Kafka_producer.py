@@ -36,9 +36,9 @@ linger_ms = kafka_configs.get("LINGER_MS").data
 
 def delivery_report(errmsg, msg):
     if errmsg is not None:
-        print("Delivery failed for Message: {} : {}".format(msg.key(), errmsg))
+        logging.info("Delivery failed for Message: {} : {}".format(msg.key(), errmsg))
         return
-    print('Message: {} successfully produced to Topic: {} Partition: [{}] at offset {}'.format(msg.key(), msg.topic(), msg.partition(), msg.offset()))
+    logging.info('Message: {} successfully produced to Topic: {} Partition: [{}] at offset {}'.format(msg.key(), msg.topic(), msg.partition(), msg.offset()))
 
 
 def publish_to_Kafka(topic_name, decoded_json, producer):
@@ -48,12 +48,12 @@ def publish_to_Kafka(topic_name, decoded_json, producer):
         # Trigger any available delivery report callbacks from previous produce() calls
 	logging.info("Trigger any available delivery report callbacks from previous produce() calls")    
         events_processed = producer.poll(1)
-        print(f"events_processed: {events_processed}")
+        logging.info(f"events_processed: {events_processed}")
 
         messages_in_queue = producer.flush(1)
-        print(f"messages_in_queue: {messages_in_queue}")
+        logging.info(f"messages_in_queue: {messages_in_queue}")
     except Exception as e:
-        print(e)
+        logging.error(e)
         insertInto_DynamoDB(decoded_json)    
 
 
