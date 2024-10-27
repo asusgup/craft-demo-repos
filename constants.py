@@ -1,4 +1,4 @@
-{
+SCHEMA_STR = {
   "type": "record",
   "name": "Record",
   "fields": [
