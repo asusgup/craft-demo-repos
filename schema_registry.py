@@ -5,8 +5,14 @@ import logging
 # imort from constants
 from constants import SCHEMA_STR
 
-schema_registry_url = 'http://localhost:8081'
-kafka_topic = 'craft-demo-topic'
+
+
+kafka_configs = Properties()
+with open('kafka-configs.properties', 'rb') as config_file:
+		 kafka_configs.load(config_file)
+
+schema_registry_url = kafka_configs.get('SCHEMA_REGISTRY_URL').get
+kafka_topic = kafka_configs.get('KAFKA_TOPIC').get
 schema_registry_subject = f"{kafka_topic}-value"
 
 class SchemaRegistryUtils:
