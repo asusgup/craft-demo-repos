@@ -1,7 +1,7 @@
 # 3rd party library imported
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry import Schema
-
+import logging
 # imort from constants
 from constants import SCHEMA_STR
 
@@ -31,13 +31,13 @@ class SchemaRegistryUtils:
     def update_schema(self, schema_str):
         sr = SchemaRegistryClient({'url': self.schema_registry_url})
         versions_deleted_list = sr.delete_subject(self.schema_registry_subject)
-        print(f"versions of schema deleted list: {versions_deleted_list}")
+        logging.info(f"versions of schema deleted list: {versions_deleted_list}")
 
         schema_id = register_schema(self.schema_registry_url, schema_registry_subject, schema_str)
         return schema_id
 
 schema_id = register_schema(schema_registry_url, schema_registry_subject, SCHEMA_STR)
-print(schema_id)
+logging.info(schema_id)
 
 sr, latest_version = get_schema_from_schema_registry(schema_registry_url, schema_registry_subject)
-print(latest_version.schema.schema_str)
+logging.info(latest_version.schema.schema_str)
