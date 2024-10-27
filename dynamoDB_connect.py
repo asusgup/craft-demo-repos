@@ -1,6 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
 from jproperties import Properties
+import logging
 
 configs = Properties()
 with open('dynamoDB-config.properties', 'rb') as config_file:
@@ -23,8 +24,9 @@ def insertInto_DynamoDB(decoded_json, table_name):
     table = dynamodb.Table(table_name)
 
     # Insert data into the table
+    logging.info("Insert data into the dynamodb table")	
     try:
         response = table.put_item(Item=item)
-        print("Insert succeeded:", response)
+        logging.info("Insert succeeded:", response)
     except ClientError as e:
-        print("Error inserting item:", e.response['Error']['Message'])
+        logging.error("Error inserting item:", e.response['Error']['Message'])
