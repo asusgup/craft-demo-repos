@@ -43,4 +43,4 @@
 
 * AWS Lambda - Serves as a event based serverless function utility which checks for bad/stale records in DynamoDB and retries the message publishing back to kafka. Also responsible for triggering critical alert msgs to concerned teams.
 
-* AWS DynamoDB - DynamoDB supports eventual consistency and high availability so that during kafka service unavailability, The events could be efficiently stored in DynamoDB. 
+* AWS DynamoDB - DynamoDB supports eventual consistency and high availability so that during kafka service unavailability, The events could be efficiently stored in DynamoDB. DynamoDB offers fast local read and write performance, with single-digit millisecond response times. The events could be efficiently stored in DynamoDB. Also it is scalable and provides high availability.
