@@ -5,6 +5,7 @@ from jproperties import Properties
 from pyspark.sql.functions import col
 from delta.tables import *
 from datetime import datetime
+import logging
 
 kafka_configs = Properties()
 with open('kafka-configs.properties', 'rb') as config_file:
@@ -17,6 +18,7 @@ def flatten_json_and_Write_To_S3(after_json, primary_keys):
     # Reading and flatteing the data
     # Took example of following sample json event => https://opensource.adobe.com/Spry/samples/data_region/JSONDataSetSample.html#Exam
 
+    logging.info("Reading and flatteing the data")	
     df = spark.read.option("multiline", "true").option("escape", "\"").json(after_json)
     flatten_df = df.withColumn("batters_ids",col("batters.batter.id"))\
       .withColumn("batters_types",col("batters.batter.type"))\
@@ -28,6 +30,7 @@ def flatten_json_and_Write_To_S3(after_json, primary_keys):
     today_date = datetime.today().strftime("%Y-%m-%d")
 
     # Writing the flattened data as csv format in today's date partition filter
+    logging.info("Writing the flattened data as csv format in today's date partition filter")
     flatten_df.write.format("csv").option("header","true").save(f"s3_bucket/{date}".format(date = today_date))
 
 
@@ -35,6 +38,7 @@ def consumer_Processing(data, primary_keys):
     # Here We are flattening the json data and merging with the target table in data lake
 
     data_without_delete_events = []
+    logging.info("Filtering out the deleted events on source side, Only include 'I' and 'U' (Insert and Update")	
     for events in data:
         if events['op'] != 'D':   # Filtering out the deleted events on source side, Only include 'I' and 'U' (Insert and Update)
             data_without_delete_events.append(events['after'])
@@ -59,6 +63,7 @@ consumer.subscribe([kafka_configs.get("KAFKA_TOPIC").data])
 
 try:
     # Poll for records
+    logging.info("Polling for records from kafka")	
     while True:
         records = consumer.poll(timeout=1000)  # Adjust timeout as needed
         if records:
@@ -71,9 +76,10 @@ try:
                 if msg.error():
                     if msg.error().code() == KafkaError._PARTITION_EOF:
                         # End of partition event, can be ignored
+			logging.error(msg.error())    
                         continue
                     else:
-                        print(f"Error: {msg.error()}")
+                        logging.info(f"Error: {msg.error()}")
                         break
 
                 # Process the message
@@ -84,7 +90,7 @@ try:
                 primary_keys = json.loads(key).keys()
                 data.append(value)
 
-                print(f"Consumed record with key: {key} and value: {value}")
+                logging.info(f"Consumed record with key: {key} and value: {value}")
         
         # Starting ETL processing of data
         consumer_Processing(data,primary_keys)
@@ -92,6 +98,7 @@ try:
             print("No records found.")
 
         # Commiting Offsets back to kafka    
+	logging.info("Commiting Offsets back to kafka")
         consumer.commit(asynchronous=False)    
 
 finally:
