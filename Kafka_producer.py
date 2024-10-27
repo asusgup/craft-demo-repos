@@ -9,6 +9,7 @@ from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer
 from confluent_kafka.schema_registry import Schema
 from schema_registry import SchemaRegistryUtils
+import logging
 
 
 mysql_configs = Properties()
@@ -45,6 +46,7 @@ def publish_to_Kafka(topic_name, decoded_json, producer):
         producer.produce(topic=topic_name, key=decoded_json["key"], value=decoded_json["value"], on_delivery=delivery_report)
 
         # Trigger any available delivery report callbacks from previous produce() calls
+	logging.info("Trigger any available delivery report callbacks from previous produce() calls")    
         events_processed = producer.poll(1)
         print(f"events_processed: {events_processed}")
 
@@ -57,6 +59,7 @@ def publish_to_Kafka(topic_name, decoded_json, producer):
 
 def avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_subject):
     # schema registry
+    logging.info("Initialising schema registry")	
     registryObj = SchemaRegistryUtils(schema_registry_url, kafka_topic, schema_registry_subject)
 
     sr, latest_version = registryObj.get_schema_from_schema_registry()
@@ -70,6 +73,7 @@ def avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_su
                                           )
 
     # Kafka Producer
+    logging.info("Initialising kafka producer")	
     producer = SerializingProducer({
         'bootstrap.servers': kafka_url,
         'security.protocol': Security_protocol,
@@ -95,12 +99,13 @@ def avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_su
                 decoded_line = line.decode()
                 if decoded_line.find("key") >= 0 and decoded_line.find("value") >= 0:
                     # convert to json
-                    CURRENT_MAX_UPD_DT = max(CURRENT_MAX_UPD_DT, decoded_json["value"]["source"]["ts_ms"])
+                    CURRENT_MAX_UPD_DT = max(CURRENT_MAX_UPD_DT, decoded_json["value"]["ts_ms"])
                     decoded_json = json.loads(decoded_line)
                     publish_to_Kafka(kafka_topic, decoded_json, producer)
                     
                 else:
                     # PUBLISING THE BAD DATA TO DynamoDB
+		    logging.info("PUBLISING THE BAD DATA TO DynamoDB")	
                     insertInto_DynamoDB(decoded_json) 
 
     connection, cursor = build_Mysql_Connection()
@@ -109,4 +114,5 @@ def avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_su
 
 while True:
     avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_subject)
+    logging.info("Putting a delay of 3seconds b/w 2 GET reuest to API")	
     sleep(3000)
