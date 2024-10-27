@@ -22,7 +22,7 @@
 
 * If the ambiguous messages  in DynamoDB are non-retriable, then those events can be considered as stale events and appropriate notification/alerts can be triggered to the concerned teams. These messages can then be deleted from DynamoDB.
 * A Retry producer Lambda Function is configured to retry sending the messages from DynamoDB., if retriable to Kafka topics once it is available.
-* Kafka availability can be tracked using AWS cloudwatch, Once available all retrievable messages are sent to kafka.
+* Kafka availability can be tracked using AWS cloudwatch, Once available all retrievable messages are sent to kafka using Kafka-producer SDK.
 * Consumer Applications consume messages from kafka topics, and stores the raw, flattened json data in Raw S3 Bucket.
 * The Spark Batch Job can read the data from S3 raw bucket, transform the data and write into target table in delta lake format.
 * The Spark Streaming Job can read data from S3 raw bucket in real-time, transform and write into Target table in delta lake format.
