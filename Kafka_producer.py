@@ -86,6 +86,7 @@ def avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_su
         'linger.ms': linger_ms
     })
 
+    logging.info("Getting latest upd timestamp from mysql rds")
     connection, cursor = build_Mysql_Connection()
     cursor.execute(f"Select max(last_upd) from {db}.cmpny_data where feed_name = 'cmpny_data'".format(db=mysql_configs.get("mysql_report_database").data))
     last_upd_dt = cursor.fetchall()[0][0]
@@ -93,6 +94,7 @@ def avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_su
 
     s = requests.Session()
     CURRENT_MAX_UPD_DT = 0
+    logging.info("Calling API for its GET response")	
     with s.get(source_url_final, headers=None, stream=True) as resp:
         for line in resp.iter_lines():
             if line:
@@ -101,6 +103,7 @@ def avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_su
                     # convert to json
                     CURRENT_MAX_UPD_DT = max(CURRENT_MAX_UPD_DT, decoded_json["value"]["ts_ms"])
                     decoded_json = json.loads(decoded_line)
+		    logging.info("publishing data to Kafka")	
                     publish_to_Kafka(kafka_topic, decoded_json, producer)
                     
                 else:
@@ -108,6 +111,7 @@ def avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_su
 		    logging.info("PUBLISING THE BAD DATA TO DynamoDB")	
                     insertInto_DynamoDB(decoded_json) 
 
+    logging.info("Updating latest upd timestamp for CURRENT_MAX_UPD_DT to mysql rds")
     connection, cursor = build_Mysql_Connection()
     cursor.execute(f"UPDATE {db}.cmpny_data SET last_upd = CURRENT_MAX_UPD_DT WHERE feed_name = 'cmpny_data'")                    
 
