@@ -38,11 +38,47 @@ merge_condition = merge_condition.strip()
 
 # Applying the merge statement at Target Delta table to perform UPSERTS and remove DELETED data from source
 logging.info("Applying the merge statement at Target Delta table to perform UPSERTS and remove DELETED data from source")
+
+cdc_events_source_insert = cdc_events_source.filter("op == 'I' ")
+cdc_events_source_insert = cdc_events_source.filter("op == 'U' ")
+cdc_events_source_insert = cdc_events_source.filter("op == 'D' ")
+
+
+logging.info("Applying the merge statement at Target Delta table to perform INSERTS")
+
 targetTable.alias("old_data")\
 .merge(
-    cdc_events_source.alias("new_events"), merge_condition
+    cdc_events_source_insert.alias("new_events"), merge_condition
 )\
-.whenMatchedUpdateAll("new_events.op <> 'D'")\
-.whenNotMatchedInsertAll("new_events.op <> 'D'")\
-.whenMatchedDeleteAll("new_events.op == 'D'")\
+.whenNotMatchedInsertAll()\
 .execute()
+
+
+logging.info("Applying the merge statement at Target Delta table to perform UPDATES")
+
+targetTable.alias("old_data")\
+.merge(
+    cdc_events_source_update.alias("new_events"), merge_condition
+)\
+.whenMatchedUpdateAll()\
+.execute()
+
+
+
+logging.info("Applying the merge statement at Target Delta table to perform DELETES")
+
+targetTable.alias("old_data")\
+.merge(
+    cdc_events_source_delete.alias("new_events"), merge_condition
+)\
+.whenMatchedDelete()\
+.execute()
+
+
+
+
+
+
+
+
+
