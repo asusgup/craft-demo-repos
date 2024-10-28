@@ -92,8 +92,8 @@ try:
 
                 logging.info(f"Consumed record with key: {key} and value: {value}")
         
-        # Starting ETL processing of data
-        consumer_Processing(data,primary_keys)
+            # Starting ETL processing of data
+            consumer_Processing(data,primary_keys)
         else:
             print("No records found.")
 
