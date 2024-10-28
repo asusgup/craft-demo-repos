@@ -42,7 +42,7 @@ targetTable.alias("old_data")\
 .merge(
     cdc_events_source.alias("new_events"), merge_condition
 )\
-.whenMatchedUpdateAll()\
-.whenNotMatchedInsertAll()\
-.whenNotMatchedBySourceDelete()\
+.whenMatchedUpdateAll("new_events.op <> 'D'")\
+.whenNotMatchedInsertAll("new_events.op <> 'D'")\
+.whenMatchedDeleteAll("new_events.op == 'D'")\
 .execute()
