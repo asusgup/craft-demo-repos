@@ -38,7 +38,7 @@ def consumer_Processing(data, primary_keys):
     # Here We are flattening the json data and merging with the target table in data lake
 
     data_without_delete_events = []
-    logging.info("Filtering out the deleted events on source side, Only include 'I' and 'U' (Insert and Update")	
+    logging.info("Filtering out the deleted events on source side, ")	
     for events in data:
         if events['op'] != 'D':
 	    # Filtering out the deleted events on source side,
