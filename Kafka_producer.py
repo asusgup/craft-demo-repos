@@ -119,4 +119,4 @@ def avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_su
 while True:
     avro_producer(source_url, kafka_url, schema_registry_url, schema_registry_subject)
     logging.info("Putting a delay of 3seconds b/w 2 GET reuest to API")	
-    sleep(3000)
+    sleep(3)
