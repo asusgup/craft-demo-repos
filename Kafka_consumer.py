@@ -93,7 +93,11 @@ try:
                 logging.info(f"Consumed record with key: {key} and value: {value}")
         
             # Starting ETL processing of data
-            consumer_Processing(data,primary_keys)
+	    try:	
+               consumer_Processing(data,primary_keys)
+	    except Exception as e:
+		    logging.error(f"Data processing at consumer end failed due to error - {err}".format(err=e))
+		    continue   # Stopping at furthure Commit to kafka as message processing failed
         else:
             print("No records found.")
 
