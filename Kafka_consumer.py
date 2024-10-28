@@ -40,8 +40,13 @@ def consumer_Processing(data, primary_keys):
     data_without_delete_events = []
     logging.info("Filtering out the deleted events on source side, Only include 'I' and 'U' (Insert and Update")	
     for events in data:
-        if events['op'] != 'D':   # Filtering out the deleted events on source side, Only include 'I' and 'U' (Insert and Update)
+        if events['op'] != 'D':
+	    # Filtering out the deleted events on source side,
+	    events['after']['op']=events['op']	
             data_without_delete_events.append(events['after'])
+	else:
+	    events['before']['op']=events['op']	
+            data_without_delete_events.append(events['before'])	
 
     flatten_json_and_Write_To_S3(data_without_delete_events, primary_keys)
 
